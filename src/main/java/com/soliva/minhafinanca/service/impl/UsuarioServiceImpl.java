@@ -1,9 +1,12 @@
 package com.soliva.minhafinanca.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.soliva.minhafinanca.exception.ErroAutenticacao;
 import com.soliva.minhafinanca.exception.RegraNegocioException;
 import com.soliva.minhafinanca.model.entity.Usuario;
 import com.soliva.minhafinanca.model.repository.UsuarioRepository;
@@ -22,7 +25,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 
 	@Override
 	public Usuario autenticar(String email, String senha) {
-		return null;
+		Optional<Usuario> usuario = repository.findByEmail(email);
+		
+		if(!usuario.isPresent()) {
+			throw new ErroAutenticacao("Usuario não Encontrado para o email informado.");
+		}
+		if(!usuario.get().getSenha().equals(senha)) {
+			throw new ErroAutenticacao("Senha Invalida.");
+		}
+		return usuario.get();
 	}
 
 	@Override
