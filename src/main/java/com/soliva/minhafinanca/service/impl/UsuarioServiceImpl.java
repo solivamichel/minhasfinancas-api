@@ -2,6 +2,7 @@ package com.soliva.minhafinanca.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.soliva.minhafinanca.exception.RegraNegocioException;
 import com.soliva.minhafinanca.model.entity.Usuario;
@@ -25,8 +26,10 @@ public class UsuarioServiceImpl implements UsuarioService {
 	}
 
 	@Override
+	@Transactional
 	public Usuario salvarUsuario(Usuario usuario) {
-		return null;
+		validarEmail(usuario.getEmail());
+		return repository.save(usuario);
 	}
 	
 	@Override

@@ -40,7 +40,5 @@ public class UsuarioServiceTest {
 		
 		// Ação
 		service.validarEmail("email@email.com");
-		
-		
 	}
 }
