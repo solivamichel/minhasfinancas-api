@@ -1,5 +1,7 @@
 package com.soliva.minhafinanca.model.repository;
 
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +30,7 @@ public class UsuarioRepositoryTests {
 	@Test
 	public void deveVerificarAExistenciaDeUmEmail() {
 		// Cenário
-		Usuario usuario = Usuario.builder().nome("usuario").email("usuario@gmail.com").build();
+		Usuario usuario = criarUsuario();
 		entityManager.persist(usuario);
 		
 		// Ação // Execução
@@ -47,4 +49,51 @@ public class UsuarioRepositoryTests {
 		// Verificação
 		Assertions.assertThat(result).isFalse();
 	}
-}
+	
+	@Test
+	public void devePersistirUmUsuarioNaBaseDeDados() {
+		// Cenario
+		Usuario usuario = criarUsuario();
+		
+		// Ação
+		Usuario usuarioSalvo = repository.save(usuario);
+		
+		// Verificação
+		Assertions.assertThat(usuarioSalvo.getId()).isNotNull();
+	}
+	
+	@Test
+	public void deveBuscarUmUsuarioPorEmail() {
+		
+		// Cenario
+		Usuario usuario = criarUsuario();
+		entityManager.persist(usuario);
+		
+		// Verificacao
+		Optional<Usuario> result = repository.findByEmail("usuario@gmail.com");
+		
+		Assertions.assertThat(result.isPresent()).isTrue();
+		
+	}
+	
+	@Test
+	public void deveRetornarVazioAoBuscarUsuarioPorEmailQndoNaoExisteNaBase() {
+		
+		// Cenario
+		
+		// Verificacao
+		Optional<Usuario> result = repository.findByEmail("usuario@gmail.com");
+		
+		Assertions.assertThat(result.isPresent()).isFalse();
+		
+	}
+	
+	public static Usuario criarUsuario() {
+		return Usuario
+				.builder()
+				.nome("usuario")
+				.email("usuario@gmail.com")
+				.senha("usuario")
+				.build();
+	}
+ }
