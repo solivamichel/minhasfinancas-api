@@ -14,6 +14,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table( name = "usuario" , schema = "financas")
@@ -38,6 +39,7 @@ public class Usuario implements Serializable {
 	private String email;
 	
 	@Column(name = "senha")
+	@Setter
 	private String senha;
-	  
+	
 }
