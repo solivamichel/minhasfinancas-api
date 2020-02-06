@@ -1,32 +1,72 @@
 package com.soliva.minhafinanca.service;
 
+import java.util.Optional;
+
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.soliva.minhafinanca.exception.ErroAutenticacao;
 import com.soliva.minhafinanca.exception.RegraNegocioException;
 import com.soliva.minhafinanca.model.entity.Usuario;
 import com.soliva.minhafinanca.model.repository.UsuarioRepository;
 import com.soliva.minhafinanca.service.impl.UsuarioServiceImpl;
 
-@SpringBootTest
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 public class UsuarioServiceTest {
 	
 	UsuarioService service;
 	
+	@MockBean
 	UsuarioRepository repository;
 	
 	@Before
 	public void setUp() {
-		repository = Mockito.mock(UsuarioRepository.class);
 		service = new UsuarioServiceImpl(repository);
+	}
+	
+	@Test(expected = Test.None.class)
+	public void deveAutenticarUmUsuarioComSucesso() {
+		// Cenário
+		String email = "email@email.com";
+		String senha = "senha";
+		
+		Usuario usuario = Usuario.builder().email(email).senha(senha).id(1l).build();
+		Mockito.when(repository.findByEmail(email)).thenReturn(Optional.of(usuario));
+		
+		// Ação
+		Usuario result = service.autenticar(email, senha);
+		
+		// Verificacao
+		Assertions.assertThat(result).isNotNull();
+	}
+	
+	@Test(expected = ErroAutenticacao.class)
+	public void deveLancarErroQuandoNaoEncontrarUsuarioCadastradoComOEmailInformado() {
+		// Cenário
+		Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(Optional.empty());
+		
+		// Ação
+		service.autenticar("email@email.com", "senha");
+	}
+	
+	@Test(expected = ErroAutenticacao.class)
+	public void deveLancarErroQuandoSenhaNaoBater() {
+		// Cenário
+		String senha = "senha";
+		String email = "email@email.com";
+		
+		Usuario usuario = Usuario.builder().email(email).senha(senha).build();
+		Mockito.when(repository.findByEmail(Mockito.anyString())).thenReturn(Optional.of(usuario));
+		
+		// Ação
+		service.autenticar("email@email.com", "michel22");
 	}
 	
 	@Test(expected = Test.None.class)
@@ -41,11 +81,9 @@ public class UsuarioServiceTest {
 	
 	@Test(expected = RegraNegocioException.class)
 	public void deveLancarErroAoValidarEmailQuandoExistirEmailCadastrado() {
-		// Cenario
-		Usuario usuario = Usuario.builder().nome("usuario").email("email@email.com").build();
-		repository.save(usuario);
 		
-		// Ação
+		Mockito.when(repository.existsByEmail(Mockito.anyString())).thenReturn(true);
+		
 		service.validarEmail("email@email.com");
 	}
 }
