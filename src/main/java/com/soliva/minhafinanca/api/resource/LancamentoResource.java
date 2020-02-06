@@ -24,17 +24,16 @@ import com.soliva.minhafinanca.model.enums.TipoLancamento;
 import com.soliva.minhafinanca.service.LancamentoService;
 import com.soliva.minhafinanca.service.UsuarioService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/lancamentos")
+@RequiredArgsConstructor
 public class LancamentoResource {
 	
-	private LancamentoService service;
+	private final LancamentoService service;
 	
-	private UsuarioService usuarioService; 
-	
-	public LancamentoResource(LancamentoService service) {
-		this.service = service;
-	}
+	private final UsuarioService usuarioService; 
 	
 	@GetMapping
 	public ResponseEntity buscar(
@@ -104,8 +103,15 @@ public class LancamentoResource {
 		Usuario usuario = usuarioService.obterPorId(dto.getUsuario()).orElseThrow( () -> new RegraNegocioException("Usuario não encontrado para o Id Informado."));
 		
 		lancamento.setUsuario(usuario);
-		lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
-		lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
+		
+		if(dto.getTipo() != null ) {
+			lancamento.setTipo(TipoLancamento.valueOf(dto.getTipo()));
+		}
+		
+		if(dto.getStatus() !=  null) {
+			lancamento.setStatus(StatusLancamento.valueOf(dto.getStatus()));
+		}
+		
 		return lancamento;
 	}
 }
