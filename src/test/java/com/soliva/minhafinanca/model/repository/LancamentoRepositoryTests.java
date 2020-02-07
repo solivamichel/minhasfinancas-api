@@ -2,6 +2,7 @@ package com.soliva.minhafinanca.model.repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -15,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.soliva.minhafinanca.model.entity.Lancamento;
+import com.soliva.minhafinanca.model.enums.StatusLancamento;
 import com.soliva.minhafinanca.model.enums.TipoLancamento;
 
 @RunWith(SpringRunner.class)
@@ -40,8 +42,7 @@ public class LancamentoRepositoryTests {
 	
 	@Test
 	public void deveDeletarUmLancamento() {
-		Lancamento lancamento = criarLancamento();
-		entityManager.persist(lancamento);
+		Lancamento lancamento = criarEPersistirUmLancamento();
 		
 		entityManager.find(Lancamento.class, lancamento.getId());
 		
@@ -49,6 +50,37 @@ public class LancamentoRepositoryTests {
 		
 		Lancamento lancamentoInexistente = entityManager.find(Lancamento.class, lancamento.getId());
 		Assertions.assertThat(lancamentoInexistente).isNull();
+	}
+
+	@Test
+	public void deveAtualizarUmLancamento() {
+		Lancamento lancamento = criarEPersistirUmLancamento();
+		lancamento.setAno(2018);
+		lancamento.setDescricao("Teste Atualizar");
+		lancamento.setStatus(StatusLancamento.CANCELADO);
+		
+		repository.save(lancamento);
+		Lancamento lancamentoAtualizado = entityManager.find(Lancamento.class, lancamento.getId());
+		
+		Assertions.assertThat(lancamentoAtualizado.getAno()).isEqualTo(2018);
+		Assertions.assertThat(lancamentoAtualizado.getDescricao()).isEqualTo("Teste Atualizar");
+		Assertions.assertThat(lancamentoAtualizado.getStatus()).isEqualTo(StatusLancamento.CANCELADO);
+		
+	}
+	
+	@Test
+	public void deveBuscarUmLancamentoPorId() {
+		Lancamento lancamento = criarEPersistirUmLancamento();
+		
+		Optional<Lancamento> lancamentoEncontrado = repository.findById(lancamento.getId());
+		
+		Assertions.assertThat(lancamentoEncontrado.isPresent()).isTrue();
+	}
+	
+	private Lancamento criarEPersistirUmLancamento() {
+		Lancamento lancamento = criarLancamento();
+		entityManager.persist(lancamento);
+		return lancamento;
 	}
 	
 	private Lancamento criarLancamento() {
